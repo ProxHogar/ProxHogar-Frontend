@@ -20,7 +20,12 @@ export const DashboardLayout: React.FC = () => {
     setShowVerification(true)
   }
 
-  const handleVerificationSuccess = async (dto: { biografia: string; fotoBiometricaReferenciaUrl: string }) => {
+  const handleVerificationSuccess = async (dto: {
+    biografia: string
+    fotoBiometricaReferenciaUrl: string
+    dni: string
+    antecedentesPenalesVerificados: boolean
+  }) => {
     try {
       await switchToWorkerRole(dto)
       setShowVerification(false)

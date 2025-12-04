@@ -6,7 +6,12 @@ import { AlertCircle, CheckCircle2, Loader, X, UploadCloud } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 
 interface WorkerVerificationProps {
-  onSuccess: (dto: { biografia: string; fotoBiometricaReferenciaUrl: string }) => void
+  onSuccess: (dto: {
+    biografia: string
+    fotoBiometricaReferenciaUrl: string
+    dni: string
+    antecedentesPenalesVerificados: boolean
+  }) => void
   onCancel: () => void
 }
 
@@ -15,6 +20,7 @@ export const WorkerVerification: React.FC<WorkerVerificationProps> = ({ onSucces
   const [dniNumber, setDniNumber] = useState("")
   const [biografia, setBiografia] = useState("")
   const [fotoUrl, setFotoUrl] = useState("")
+  const [antecedentesPenalesVerificados, setAntecedentesPenalesVerificados] = useState(true)
   const [photoUploaded, setPhotoUploaded] = useState(false) // New state for UI feedback
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -59,11 +65,18 @@ export const WorkerVerification: React.FC<WorkerVerificationProps> = ({ onSucces
 
     await new Promise((resolve) => setTimeout(resolve, 2000))
 
+    // Simulate a failure in background check
     if (Math.random() > 0.95) {
       setError("No se puede completar la verificación. Contacta a soporte.")
+      setAntecedentesPenalesVerificados(false) // Set the flag to false on failure
       setLoading(false)
-      return
+      // We don't return here, we still want to proceed to the success step
+      // to record the result of the verification. The backend will store
+      // that the verification was attempted but failed.
+    } else {
+      setAntecedentesPenalesVerificados(true)
     }
+
 
     setStep("success")
     setLoading(false)
@@ -213,7 +226,14 @@ export const WorkerVerification: React.FC<WorkerVerificationProps> = ({ onSucces
                 </p>
               </div>
               <button
-                onClick={() => onSuccess({ biografia, fotoBiometricaReferenciaUrl: fotoUrl })}
+                onClick={() =>
+                  onSuccess({
+                    biografia,
+                    fotoBiometricaReferenciaUrl: fotoUrl,
+                    dni: dniNumber,
+                    antecedentesPenalesVerificados,
+                  })
+                }
                 className="w-full bg-emerald-600 text-white py-3 rounded-lg font-bold hover:bg-emerald-700"
               >
                 Comenzar como Profesional

@@ -20,7 +20,12 @@ interface AuthContextType {
   login: (userData: User) => void
   logout: () => void
   toggleRoleView: () => void
-  switchToWorkerRole: (dto: { biografia: string; fotoBiometricaReferenciaUrl: string }) => Promise<void>
+  switchToWorkerRole: (dto: {
+    biografia: string
+    fotoBiometricaReferenciaUrl: string
+    dni: string
+    antecedentesPenalesVerificados: boolean
+  }) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -70,7 +75,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setActiveRole("CLIENTE")
   }
 
-  const switchToWorkerRole = async (dto: { biografia: string; fotoBiometricaReferenciaUrl: string }) => {
+  const switchToWorkerRole = async (dto: {
+    biografia: string
+    fotoBiometricaReferenciaUrl: string
+    dni: string
+    antecedentesPenalesVerificados: boolean
+  }) => {
     if (!user || user.esTrabajador) return;
 
     setIsLoading(true);
