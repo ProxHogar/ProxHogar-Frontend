@@ -7,11 +7,31 @@ import { ClientDashboard } from "@/components/client/client-dashboard"
 import { WorkerDashboard } from "@/components/worker/worker-dashboard"
 import { SubscriptionPage } from "@/components/subscription/subscription-page"
 import { MyProfileView } from "@/components/common/my-profile-view"
+import { WorkerVerification } from "@/components/worker/worker-verification"
 import { LayoutDashboard, CreditCard, LogOut, Menu, ChevronRight, User } from "lucide-react"
 
 export const DashboardLayout: React.FC = () => {
-  const { user, activeRole, logout, toggleRole } = useAuth()
+  const { user, activeRole, logout, switchToWorkerRole } = useAuth()
   const [view, setView] = useState("dashboard")
+  const [showVerification, setShowVerification] = useState(false)
+
+
+  const handleToggleRole = () => {
+    setShowVerification(true)
+  }
+
+  const handleVerificationSuccess = async (dto: { biografia: string; fotoBiometricaReferenciaUrl: string }) => {
+    try {
+      await switchToWorkerRole(dto)
+      setShowVerification(false)
+    } catch (error) {
+      console.error("Failed to switch to worker role from layout.")
+    }
+  }
+
+  const handleVerificationCancel = () => {
+    setShowVerification(false)
+  }
 
   return (
     <div className="flex min-h-screen bg-slate-50 font-sans text-slate-900">
@@ -50,10 +70,12 @@ export const DashboardLayout: React.FC = () => {
               <p className="text-xs opacity-50 mb-1">Rol Actual</p>
               <p className="font-bold mb-3">{activeRole}</p>
               <button
-                onClick={toggleRole}
-                className="w-full bg-white/20 py-2 rounded text-xs flex justify-center gap-2"
+                onClick={handleToggleRole}
+                disabled={user?.hasChangedToWorker}
+                className="w-full bg-white/20 py-2 rounded text-xs flex justify-center gap-2 hover:bg-white/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title={user?.hasChangedToWorker ? "El cambio de rol solo se puede realizar una vez." : "Convertirse en trabajador"}
               >
-                Cambiar Rol <ChevronRight className="w-3 h-3" />
+                {user?.esTrabajador ? "Rol de Trabajador" : "Cambiar a Trabajador"} <ChevronRight className="w-3 h-3" />
               </button>
             </div>
           </div>
@@ -72,16 +94,24 @@ export const DashboardLayout: React.FC = () => {
           <Menu className="w-6 h-6" />
         </header>
 
-        {view === "planes" ? (
+        
+        {view === "dashboard" ? (
+          activeRole === "CLIENTE" ? (
+            <ClientDashboard />
+          ) : (
+            <WorkerDashboard />
+          )
+        ) : view === "planes" ? (
           <SubscriptionPage />
         ) : view === "profile" ? (
           <MyProfileView />
-        ) : activeRole === "CLIENTE" ? (
-          <ClientDashboard />
-        ) : (
-          <WorkerDashboard />
-        )}
+        ) : null}
+
       </main>
+
+      {showVerification && (
+        <WorkerVerification onSuccess={handleVerificationSuccess} onCancel={handleVerificationCancel} />
+      )}
     </div>
   )
 }
