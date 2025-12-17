@@ -1,5 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://proxhogar-api-264213836001.us-east1.run.app";
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://proxhogar-api-264213836001.us-east1.run.app/api";
 export interface ApiCallOptions {
   endpoint: string;
   method?: "GET" | "POST" | "PUT" | "DELETE";
